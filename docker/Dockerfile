@@ -51,11 +51,12 @@ RUN git clone https://github.com/opencv/opencv.git  \
     && make install
 
 # Install r3live
-#WORKDIR $HOME
-#RUN mkdir r3live_ws && mkdir r3live_ws/src && cd r3live_ws/src \
-#    && git clone git@github.com:leo-stan/r3live.git \
-#    && cd .. \
-#    && catkin_make \
-#    && echo "source $HOME/r3live_ws/devel/setup.sh" >> $HOME/.bashrc
+WORKDIR $HOME
+RUN mkdir r3live_ws && mkdir r3live_ws/src && cd r3live_ws/src \
+    && git clone https://github.com/leo-stan/r3live.git \
+    && cp r3live/docker/serialization.h /usr/include/flann/util/serialization.h \
+    && cd .. \
+    && catkin_make \
+    && echo "source $HOME/r3live_ws/devel/setup.sh" >> $HOME/.bashrc
 
 RUN source $HOME/.bashrc
