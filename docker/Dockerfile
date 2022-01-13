@@ -1,4 +1,5 @@
 FROM ros:melodic-ros-core-bionic
+SHELL ["/bin/bash", "--login", "-c"]
 
 # Install essential stuff
 RUN apt update && apt -y install cmake \
@@ -6,7 +7,8 @@ RUN apt update && apt -y install cmake \
 	git \
 	build-essential \
     nano \
-    vim
+    vim \
+    tmux
 
 # Install ROS Desktop-Full version (base image is only ros-core)
 RUN apt install ros-melodic-desktop-full -y
@@ -22,6 +24,7 @@ ENV HOME /root
 # Setup bashrc
 WORKDIR $HOME
 RUN touch .bashrc
+RUN echo "source /opt/ros/melodic/setup.bash" >> $HOME/.bashrc && source $HOME/.bashrc
 
 # Install Livox SDK
 # https://github.com/Livox-SDK/Livox-SDK
@@ -37,8 +40,9 @@ RUN git clone https://github.com/Livox-SDK/Livox-SDK.git \
 WORKDIR $HOME
 RUN git clone https://github.com/Livox-SDK/livox_ros_driver.git ws_livox/src \
     && cd ws_livox \
+    && source /opt/ros/melodic/setup.bash \
     && catkin_make \
-    && echo "source $HOME/ws_livox/devel/setup.sh" >> $HOME/.bashrc
+    && echo "source $HOME/ws_livox/devel/setup.bash" >> $HOME/.bashrc
 
 # Install opencv 3.4.0
 WORKDIR $HOME
@@ -50,13 +54,15 @@ RUN git clone https://github.com/opencv/opencv.git  \
     && make \
     && make install
 
-# Install r3live
+## Install r3live
 WORKDIR $HOME
 RUN mkdir r3live_ws && mkdir r3live_ws/src && cd r3live_ws/src \
     && git clone https://github.com/leo-stan/r3live.git \
     && cp r3live/docker/serialization.h /usr/include/flann/util/serialization.h \
     && cd .. \
+    && source /opt/ros/melodic/setup.bash \
+    && source $HOME/ws_livox/devel/setup.bash \
     && catkin_make \
-    && echo "source $HOME/r3live_ws/devel/setup.sh" >> $HOME/.bashrc
+    && echo "source $HOME/r3live_ws/devel/setup.bash" >> $HOME/.bashrc
 
 RUN source $HOME/.bashrc
